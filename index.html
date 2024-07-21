@@ -1,113 +1,53 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta name="robots" content="noindex, nofollow">
-        <style>
-            body {
-              padding: 0;
-              margin: 0;
-            }
+  <head>
+    <title>Device Orientation Example</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <script>
+      function setup() {
+        createCanvas(windowWidth, windowHeight);
+        let button = createButton('ジャイロスコープの許可を取得');
+        button.position(10, 10);
+        button.mousePressed(requestAccess);
+      }
 
-            svg:not(:root) {
-              display: block;
-            }
+      function requestAccess() {
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+          DeviceOrientationEvent.requestPermission()
+            .then(response => {
+              if (response === 'granted') {
+                // 権限が与えられた場合、deviceorientationを有効にする
+                window.addEventListener('deviceorientation', handleOrientation);
+              } else {
+                alert('デバイスの傾き情報へのアクセスが拒否されました。');
+              }
+            })
+            .catch(console.error);
+        } else {
+          // iOS 13未満やAndroidの場合
+          window.addEventListener('deviceorientation', handleOrientation);
+        }
+      }
 
-            .playable-code {
-              background-color: #f4f7f8;
-              border: none;
-              border-left: 6px solid #558abb;
-              border-width: medium medium medium 6px;
-              color: #4d4e53;
-              height: 100px;
-              width: 90%;
-              padding: 10px 10px 0;
-            }
+      function handleOrientation(event) {
+        let alpha = event.alpha; // デバイスの回転（Z軸）
+        let beta = event.beta;   // デバイスの傾き（X軸）
+        let gamma = event.gamma; // デバイスの傾き（Y軸）
 
-            .playable-canvas {
-              border: 1px solid #4d4e53;
-              border-radius: 2px;
-            }
+        // 画面に描画
+        background(200);
+        textSize(32);
+        fill(0);
+        text('alpha: ' + alpha.toFixed(2), 10, 60);
+        text('beta: ' + beta.toFixed(2), 10, 100);
+        text('gamma: ' + gamma.toFixed(2), 10, 140);
+      }
 
-            .playable-buttons {
-              text-align: right;
-              width: 90%;
-              padding: 5px 10px 5px 26px;
-            }
-        </style>
-        
-        <style>
-            .garden {
-  position: relative;
-  width: 200px;
-  height: 200px;
-  border: 5px solid #ccc;
-  border-radius: 10px;
-}
-
-.ball {
-  position: absolute;
-  top: 90px;
-  left: 90px;
-  width: 20px;
-  height: 20px;
-  background: green;
-  border-radius: 100%;
-}
-
-        </style>
-        
-        <title>端末の方向の検出 - orientation_example - code sample</title>
-        
-    </head>
-    <body>
-        
-            <div class="garden">
-  <div class="ball"></div>
-</div>
-端末を地面に並行に置いてください。 X 軸と Y 軸に沿って回転させ、ボールがそれぞれ上下左右に移動するのを確認しましょう。
-<pre class="output"></pre>
-
-        
-        
-            <script>
-                const ball = document.querySelector(".ball");
-const garden = document.querySelector(".garden");
-const output = document.querySelector(".output");
-
-const maxX = garden.clientWidth - ball.clientWidth;
-const maxY = garden.clientHeight - ball.clientHeight;
-
-function handleOrientation(event) {
-  let x = event.beta; // [-180,180) の範囲で角度を表す
-  let y = event.gamma; // [-90,90) の範囲で角度を表す
-
-  output.textContent = `beta: ${x}\n`;
-  output.textContent += `gamma: ${y}\n`;
-
-  // 端末をひっくり返したくはないため、
-  // x の値を [-90,90] の範囲に制限する
-  if (x > 90) {
-    x = 90;
-  }
-  if (x < -90) {
-    x = -90;
-  }
-
-  // 計算を容易にするため、x および y の値の範囲を
-  // 0 から 180 に変換する
-  x += 90;
-  y += 90;
-
-  // 10 は、ボールのサイズの半分である。
-  // これにより、配置場所をボールの中心に合わせる
-  ball.style.left = `${(maxY * y) / 180 - 10}px`; // Y 軸を中心に端末を移動させると、ボールが水平に移動
-  ball.style.top = `${(maxX * x) / 180 - 10}px`; // X 軸を中心に端末を移動させると、ボールが垂直に移動
-}
-
-window.addEventListener("deviceorientation", handleOrientation);
-
-            </script>
-        
-    </body>
+      function draw() {
+        // 描画はsetupで処理されるため、drawは空でも良い
+      }
+    </script>
+  </head>
+  <body>
+  </body>
 </html>
